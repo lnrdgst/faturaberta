@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-family:
+    "DM Sans",
+    "Segoe UI",
+    sans-serif;
+  background: #050706;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at top left, rgba(47, 164, 92, 0.12), transparent 24%),
+    linear-gradient(180deg, #050706 0%, #08100c 100%);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-2xl bg-accentStrong px-4 py-2.5 text-sm font-medium text-white transition hover:bg-accent;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-line bg-panelSoft px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-panel;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-danger/30 bg-danger/10 px-4 py-2.5 text-sm font-medium text-danger transition hover:bg-danger/20;
+  }
+
+  .input-base {
+    @apply rounded-2xl border border-line bg-panelSoft px-4 py-3 text-sm text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-accentStrong;
+  }
+
+  .field {
+    @apply grid gap-2 text-sm text-slate-300;
+  }
+
+  .field span {
+    @apply text-slate-400;
+  }
+
+  .field input,
+  .field select,
+  .field textarea {
+    @apply rounded-2xl border border-line bg-panelSoft px-4 py-3 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-accentStrong;
+  }
+}
