@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
+import { CardLimitModal } from "./components/CardLimitModal";
 import { EntryFormModal } from "./components/EntryFormModal";
 import { SectionCard } from "./components/SectionCard";
 import { SubscriptionFormModal, type SubscriptionDraft } from "./components/SubscriptionFormModal";
-import { exportSnapshot, importSnapshot, loadSnapshot, saveEntry, saveSubscription, deleteEntry } from "./data/db";
+import { deleteEntry, exportSnapshot, importSnapshot, loadSnapshot, saveEntry, saveSubscription, updateCardLimit } from "./data/db";
 import { deriveDescriptionSuggestions, deriveMerchantSuggestions } from "./domain/autocomplete";
 import { validateSnapshot } from "./domain/backup";
+import { isValidLimitCents } from "./domain/cardLimit";
 import { APP_STORAGE_KEY, DEFAULT_CARD_ID, DEFAULT_CATEGORIES } from "./domain/constants";
 import { formatCurrencyFromCents, formatDate, formatDateTime, formatPercent, fromDateTimeLocalValue, parseCurrencyInputToCents, toDateTimeLocalValue } from "./domain/format";
 import {
@@ -94,6 +96,7 @@ export default function App() {
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [entryDraft, setEntryDraft] = useState<EntryDraft | null>(null);
   const [subscriptionDraft, setSubscriptionDraft] = useState<SubscriptionDraft | null>(null);
+  const [cardLimitDraft, setCardLimitDraft] = useState<{ cardId: string; amount: string } | null>(null);
   const [search, setSearch] = useState("");
   const [ascending, setAscending] = useState(false);
   const [busy, setBusy] = useState(true);
@@ -250,6 +253,20 @@ export default function App() {
     await refresh();
   }
 
+  async function handleSaveCardLimit() {
+    if (!cardLimitDraft) return;
+    const limitCents = parseCurrencyInputToCents(cardLimitDraft.amount);
+    if (limitCents === null || !isValidLimitCents(limitCents)) {
+      setFeedback("Informe um limite positivo e valido.");
+      return;
+    }
+
+    await updateCardLimit(cardLimitDraft.cardId, limitCents);
+    setCardLimitDraft(null);
+    setFeedback("Limite do cartao atualizado.");
+    await refresh();
+  }
+
   async function handleExport() {
     const exported = await exportSnapshot();
     downloadJson(`faturometro-backup-${new Date().toISOString().slice(0, 10)}.json`, exported);
@@ -292,6 +309,21 @@ export default function App() {
               <div className="text-slate-400">Cartão ativo</div>
               <div className="mt-1 font-medium text-white">{cardsById[DEFAULT_CARD_ID]?.name ?? "Nubank"}</div>
               <div className="mt-1">{formatCurrencyFromCents(cardsById[DEFAULT_CARD_ID]?.limitCents ?? 0)} de limite</div>
+              <button
+                type="button"
+                className="mt-3 text-sm font-medium text-accent transition hover:text-white"
+                onClick={() => {
+                  const card = cardsById[DEFAULT_CARD_ID];
+                  if (card) {
+                    setCardLimitDraft({
+                      cardId: card.id,
+                      amount: String(card.limitCents / 100).replace(".", ","),
+                    });
+                  }
+                }}
+              >
+                Ajustar limite
+              </button>
             </div>
           </div>
         </header>
@@ -605,6 +637,15 @@ export default function App() {
           onChange={setSubscriptionDraft}
           onCancel={() => setSubscriptionDraft(null)}
           onSubmit={() => void handleSaveSubscription()}
+        />
+      ) : null}
+
+      {cardLimitDraft ? (
+        <CardLimitModal
+          amount={cardLimitDraft.amount}
+          onChange={(amount) => setCardLimitDraft({ ...cardLimitDraft, amount })}
+          onCancel={() => setCardLimitDraft(null)}
+          onSubmit={() => void handleSaveCardLimit()}
         />
       ) : null}
     </main>

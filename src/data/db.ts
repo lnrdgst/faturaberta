@@ -1,4 +1,5 @@
 import Dexie, { type Table } from "dexie";
+import { getInvoicesWithUpdatedLimit, isValidLimitCents } from "../domain/cardLimit";
 import { DEFAULT_CARD_ID, DEFAULT_CARD_LIMIT_CENTS } from "../domain/constants";
 import { buildInvoice, buildPlannedSubscriptionEntry, createNextInvoice } from "../domain/invoice";
 import type { AppSnapshot, Card, Entry, Invoice, Subscription } from "../domain/types";
@@ -126,6 +127,27 @@ export async function deleteEntry(entryId: string) {
 export async function saveSubscription(subscription: Subscription) {
   await db.subscriptions.put(subscription);
   await initializeDatabase();
+}
+
+export async function updateCardLimit(cardId: string, limitCents: number, referenceDate = new Date()) {
+  if (!isValidLimitCents(limitCents)) {
+    throw new Error("O limite do cartao deve ser um valor positivo em centavos.");
+  }
+
+  await db.transaction("rw", [db.cards, db.invoices], async () => {
+    const card = await db.cards.get(cardId);
+    if (!card) {
+      throw new Error("Cartao nao encontrado.");
+    }
+
+    const invoices = await db.invoices.where("cardId").equals(cardId).toArray();
+    const invoicesToUpdate = getInvoicesWithUpdatedLimit(invoices, cardId, limitCents, referenceDate);
+
+    await db.cards.put({ ...card, limitCents });
+    if (invoicesToUpdate.length > 0) {
+      await db.invoices.bulkPut(invoicesToUpdate);
+    }
+  });
 }
 
 export async function exportSnapshot() {

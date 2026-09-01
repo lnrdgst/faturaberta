@@ -20,12 +20,17 @@ function hasNumber(object: Record<string, unknown>, key: string) {
   return typeof object[key] === "number";
 }
 
+function hasPositiveCents(object: Record<string, unknown>, key: string) {
+  const value = object[key];
+  return typeof value === "number" && Number.isFinite(value) && Number.isInteger(value) && value > 0;
+}
+
 function isCard(value: unknown): value is Card {
   return (
     isObject(value) &&
     hasString(value, "id") &&
     hasString(value, "name") &&
-    hasNumber(value, "limitCents") &&
+    hasPositiveCents(value, "limitCents") &&
     hasBoolean(value, "active") &&
     hasString(value, "createdAt")
   );
@@ -39,7 +44,7 @@ function isInvoice(value: unknown): value is Invoice {
     hasString(value, "label") &&
     hasString(value, "periodStart") &&
     hasString(value, "closingDate") &&
-    hasNumber(value, "limitCents") &&
+    hasPositiveCents(value, "limitCents") &&
     hasString(value, "status") &&
     hasString(value, "createdAt")
   );
