@@ -4,13 +4,14 @@ import { DEFAULT_CARD_ID, DEFAULT_CARD_LIMIT_CENTS } from "../domain/constants";
 import { buildInvoice, buildPlannedSubscriptionEntry, createNextInvoice } from "../domain/invoice";
 import type { AppSnapshot, Card, Entry, Invoice, Subscription } from "../domain/types";
 
-class FaturometroDatabase extends Dexie {
+class FaturabertaDatabase extends Dexie {
   cards!: Table<Card, string>;
   invoices!: Table<Invoice, string>;
   entries!: Table<Entry, string>;
   subscriptions!: Table<Subscription, string>;
 
   constructor() {
+    // Preserve o nome persistido para continuar acessando os dados locais existentes.
     super("faturometro");
 
     this.version(1).stores({
@@ -22,7 +23,7 @@ class FaturometroDatabase extends Dexie {
   }
 }
 
-export const db = new FaturometroDatabase();
+export const db = new FaturabertaDatabase();
 
 function nowIso() {
   return new Date().toISOString();

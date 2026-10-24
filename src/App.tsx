@@ -126,7 +126,7 @@ export default function App() {
   }, [refresh]);
 
   if (busy || !snapshot) {
-    return <main className="min-h-screen bg-ink bg-aura p-6 text-slate-100">Carregando Faturômetro...</main>;
+    return <main className="min-h-screen bg-ink bg-aura p-6 text-slate-100">Carregando Faturaberta...</main>;
   }
 
   const currentSnapshot = snapshot;
@@ -269,7 +269,7 @@ export default function App() {
 
   async function handleExport() {
     const exported = await exportSnapshot();
-    downloadJson(`faturometro-backup-${new Date().toISOString().slice(0, 10)}.json`, exported);
+    downloadJson(`faturaberta-backup-${new Date().toISOString().slice(0, 10)}.json`, exported);
     setFeedback("Backup exportado em JSON.");
   }
 
@@ -298,7 +298,7 @@ export default function App() {
         <header className="rounded-[2rem] border border-line bg-panel/85 p-5 shadow-glow">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.24em] text-accent">Faturômetro</p>
+              <p className="text-sm uppercase tracking-[0.24em] text-accent">Faturaberta</p>
               <h1 className="mt-2 text-3xl font-semibold text-white">Fatura sob controle, sem complicar.</h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">
                 Aplicativo local-first para acompanhar sua fatura do cartão, registrar gastos rapidamente e
